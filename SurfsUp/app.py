@@ -10,14 +10,16 @@ from sqlalchemy import create_engine, func
 # Database Setup
 #################################################
 
+# Create our engine
 engine = create_engine("sqlite+pysqlite:////Users/bburwinkel/Desktop/OSU_Activities/sqlalchemy-challenge/SurfsUp/Resources/hawaii.sqlite")
 
-# reflect an existing database into a new model
+# Reflect an existing database into a new model
 Base = automap_base()
-# # reflect the tables
+
+# Reflect the tables
 Base.prepare(autoload_with=engine)
 
-# # Save references to each table
+# Save references to each table
 Measurement = Base.classes.measurement
 Station = Base.classes.station
 
@@ -33,6 +35,8 @@ app = Flask(__name__)
 #################################################
 # Flask Routes
 #################################################
+
+# Route for our home page
 @app.route("/")
 def home_route():
     """List all available api routes."""
@@ -45,16 +49,21 @@ def home_route():
         f"/api/v1.0/start=YYYY-MM-DD<start>/end=YYYY-MM-DD<end>"
     )
 
+# Route for our precipitation data
 @app.route("/api/v1.0/precipitation")
 def precipitation_route():
     # Create our session (link) from Python to the DB
     session = Session(engine)
 
-    # Perform a query to retrieve the data and precipitation scores from the last 12 months
+    # Finds the most recent date
     lastest_date = session.query(Measurement.date)\
         .order_by(Measurement.date.desc())\
         .first()
+    
+    # Finds the date that is one year before the most recent date in the table
     last_year = dt.date(int(lastest_date[0][:4]),int(lastest_date[0][5:7]),int(lastest_date[0][8:]))-dt.timedelta(days=365)
+
+    # Perform a query to retrieve the dates and precipitation values from the last 12 months
     query_results = session.query(Measurement)\
         .filter(Measurement.date >= last_year)\
         .order_by(Measurement.date)\
@@ -69,6 +78,7 @@ def precipitation_route():
     # Returns the jsonified data
     return jsonify(data_dic)
 
+# Route for our station data
 @app.route("/api/v1.0/stations")
 def stations_route():
     # Create our session (link) from Python to the DB
@@ -86,6 +96,7 @@ def stations_route():
     # Returns the jsonified data
     return jsonify(data_list)
 
+# Route for our temperature data of the most active station
 @app.route("/api/v1.0/tobs")
 def tobs_route():
     # Create our session (link) from Python to the DB
@@ -97,13 +108,13 @@ def tobs_route():
     .order_by(func.count(Measurement.station).desc())\
     .all()[0][0]
 
-    # Finds the most recent date
+    # Finds the most recent date for the most active station
     lastest_date = session.query(Measurement.date)\
         .filter(Measurement.station == most_active_station_id)\
         .order_by(Measurement.date.desc())\
         .first()
     
-    # Calculate the date for one year ago
+    # Finds the date that is one year before the most recent date of the most active station
     last_year = dt.date(int(lastest_date[0][:4]),int(lastest_date[0][5:7]),int(lastest_date[0][8:]))-dt.timedelta(days=365)
 
     # Perform a query to retrieve the data and precipitation values for the most active station from the last 12 months
@@ -121,12 +132,13 @@ def tobs_route():
     # Returns the jsonified data
     return jsonify(temp_list)
 
+# Route for our statistics from a start date to the lastest date
 @app.route("/api/v1.0/start=<start>")
 def start_route(start):
     # Create our session (link) from Python to the DB
     session = Session(engine)
 
-    # Perform a query to retrieve the data and precipitation values for the most active station from the last 12 months
+    # Perform a query to retrieve the min, max, and avg of all the stations from a start date to the most recent date
     query_results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.sum(Measurement.tobs)/func.count(Measurement.tobs))\
     .filter(Measurement.date >= start)\
     .all()
@@ -134,7 +146,7 @@ def start_route(start):
     # Close the session
     session.close()
 
-    # Creates a dictionary of dates and precipitation for the last year
+    # Creates a dictionary of the min, max, and avg of temperatures 
     stats_dic = {
         'Min': query_results[0][0],
         'Max': query_results[0][1],
@@ -144,12 +156,13 @@ def start_route(start):
     # Returns the jsonified data
     return jsonify(stats_dic)
 
+# Route for our statistics from a start date to an end date
 @app.route("/api/v1.0/start=<start>/end=<end>")
 def start_end_route(start, end):
     # Create our session (link) from Python to the DB
     session = Session(engine)
 
-    # Perform a query to retrieve the data and precipitation values for the most active station from the last 12 months
+    # Perform a query to retrieve the min, max, and avg of all the stations from a start date to the desired end date
     query_results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.sum(Measurement.tobs)/func.count(Measurement.tobs))\
     .filter((Measurement.date >= start)&(Measurement.date <= end))\
     .all()
@@ -157,15 +170,16 @@ def start_end_route(start, end):
     # Close the session
     session.close()
 
-    # Creates a dictionary of dates and precipitation for the last year
-    data_dic = {
+    # Creates a dictionary of the min, max, and avg of temperatures 
+    stats_dic = {
         'Min': query_results[0][0],
         'Max': query_results[0][1],
         'Avg': query_results[0][2]
     }
 
     # Returns the jsonified data
-    return jsonify(data_dic)
+    return jsonify(stats_dic)
 
+# Runs the app
 if __name__ == '__main__':
     app.run(debug=True)
