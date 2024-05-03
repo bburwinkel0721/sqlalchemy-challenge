@@ -34,15 +34,49 @@ app = Flask(__name__)
 #################################################
 @app.route("/")
 def home_route():
-    return "<h1>Hello, World!</h1>"
+    """List all available api routes."""
+    return (
+        f"Available Routes:<br/>"
+        f"/api/v1.0/precipitation<br/>"
+        f"/api/v1.0/stations<br/>"
+        f"/api/v1.0/tobs<br/>"
+        f"/api/v1.0/<start><br/>"
+        f"/api/v1.0/<start>/<end>"
+    )
 
 @app.route("/api/v1.0/precipitation")
 def precipitation_route():
-    return "<h1>Hello, World!</h1>"
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+
+    # Perform a query to retrieve the data and precipitation scores
+    query_results = session.query(Measurement).filter(Measurement.date >= '2016-08-23').order_by(Measurement.date).all()
+
+    # Close the session
+    session.close()
+
+    # Creates a dictionary of dates and precipitation for the last year
+    data_dic = {row.date:row.prcp for row in query_results}
+
+    # Returns the jsonified data
+    return jsonify(data_dic)
 
 @app.route("/api/v1.0/stations")
 def stations_route():
-    return "<h1>Hello, World!</h1>"
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+
+    # Perform a query to retrieve the station data
+    query_results = session.query(Station).all()
+
+    # Close the session
+    session.close()
+
+    # Creates a list of the station names
+    data_list = [row.name for row in query_results]
+
+    # Returns the jsonified data
+    return jsonify(data_list)
 
 @app.route("/api/v1.0/tobs")
 def tobs_route():
