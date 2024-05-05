@@ -1,6 +1,7 @@
 # Import the dependencies.
 from flask import Flask, jsonify
 import datetime as dt
+from datetime import datetime
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
@@ -61,7 +62,7 @@ def precipitation_route():
         .first()
     
     # Finds the date that is one year before the most recent date in the table
-    last_year = dt.date(int(lastest_date[0][:4]),int(lastest_date[0][5:7]),int(lastest_date[0][8:]))-dt.timedelta(days=365)
+    last_year = datetime.strptime(lastest_date[0], "%Y-%m-%d").date()-dt.timedelta(days=365)
 
     # Perform a query to retrieve the dates and precipitation values from the last 12 months
     query_results = session.query(Measurement)\
@@ -115,7 +116,7 @@ def tobs_route():
         .first()
     
     # Finds the date that is one year before the most recent date of the most active station
-    last_year = dt.date(int(lastest_date[0][:4]),int(lastest_date[0][5:7]),int(lastest_date[0][8:]))-dt.timedelta(days=365)
+    last_year = datetime.strptime(lastest_date[0], "%Y-%m-%d").date()-dt.timedelta(days=365)
 
     # Perform a query to retrieve the data and precipitation values for the most active station from the last 12 months
     query_results = session.query(Measurement)\
