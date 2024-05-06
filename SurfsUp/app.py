@@ -160,12 +160,20 @@ def start_route(start):
 # Route for our statistics from a start date to an end date
 @app.route("/api/v1.0/start=<start>/end=<end>")
 def start_end_route(start, end):
+    # Checks to see if the start date is earlier than the end date
+    if start > end:
+        beginning_date = end
+        ending_date = start
+    else:
+        beginning_date = start
+        ending_date = end
+    
     # Create our session (link) from Python to the DB
     session = Session(engine)
 
     # Perform a query to retrieve the min, max, and avg of all the stations from a start date to the desired end date
     query_results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.sum(Measurement.tobs)/func.count(Measurement.tobs))\
-    .filter((Measurement.date >= start)&(Measurement.date <= end))\
+    .filter((Measurement.date >= beginning_date)&(Measurement.date <= ending_date))\
     .all()
 
     # Close the session
