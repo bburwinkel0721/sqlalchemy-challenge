@@ -5,14 +5,14 @@ from datetime import datetime
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
-from sqlalchemy import create_engine, func
+from sqlalchemy import create_engine, func, text
 
 #################################################
 # Database Setup
 #################################################
 
 # Create our engine
-engine = create_engine("sqlite+pysqlite:////Users/bburwinkel/Desktop/OSU_Activities/sqlalchemy-challenge/SurfsUp/Resources/hawaii.sqlite")
+engine = create_engine("sqlite+pysqlite:///SurfsUp/Resources/hawaii.sqlite")
 
 # Reflect an existing database into a new model
 Base = automap_base()
