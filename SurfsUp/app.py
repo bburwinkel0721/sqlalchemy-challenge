@@ -37,6 +37,7 @@ app = Flask(__name__)
 # Flask Routes
 #################################################
 
+
 # Route for our home page
 @app.route("/")
 def home_route():
@@ -50,6 +51,7 @@ def home_route():
         f"/api/v1.0/start=YYYY-MM-DD<start>/end=YYYY-MM-DD<end>"
     )
 
+
 # Route for our precipitation data
 @app.route("/api/v1.0/precipitation")
 def precipitation_route():
@@ -57,27 +59,32 @@ def precipitation_route():
     session = Session(engine)
 
     # Finds the most recent date
-    lastest_date = session.query(Measurement.date)\
-        .order_by(Measurement.date.desc())\
-        .first()
-    
+    lastest_date = (
+        session.query(Measurement.date).order_by(Measurement.date.desc()).first()
+    )
+
     # Finds the date that is one year before the most recent date in the table
-    last_year = datetime.strptime(lastest_date[0], "%Y-%m-%d").date()-dt.timedelta(days=365)
+    last_year = datetime.strptime(lastest_date[0], "%Y-%m-%d").date() - dt.timedelta(
+        days=365
+    )
 
     # Perform a query to retrieve the dates and precipitation values from the last 12 months
-    query_results = session.query(Measurement)\
-        .filter(Measurement.date >= last_year)\
-        .order_by(Measurement.date)\
+    query_results = (
+        session.query(Measurement)
+        .filter(Measurement.date >= last_year)
+        .order_by(Measurement.date)
         .all()
+    )
 
     # Close the session
     session.close()
 
     # Creates a dictionary of dates and precipitation for the last year
-    data_dic = {row.date:row.prcp for row in query_results}
+    data_dic = {row.date: row.prcp for row in query_results}
 
     # Returns the jsonified data
     return jsonify(data_dic)
+
 
 # Route for our station data
 @app.route("/api/v1.0/stations")
@@ -97,6 +104,7 @@ def stations_route():
     # Returns the jsonified data
     return jsonify(data_list)
 
+
 # Route for our temperature data of the most active station
 @app.route("/api/v1.0/tobs")
 def tobs_route():
@@ -104,25 +112,33 @@ def tobs_route():
     session = Session(engine)
 
     # Query to find the most active station by id
-    most_active_station_id = session.query(Measurement.station, func.count(Measurement.station))\
-    .group_by(Measurement.station)\
-    .order_by(func.count(Measurement.station).desc())\
-    .all()[0][0]
+    most_active_station_id = (
+        session.query(Measurement.station, func.count(Measurement.station))
+        .group_by(Measurement.station)
+        .order_by(func.count(Measurement.station).desc())
+        .all()[0][0]
+    )
 
     # Finds the most recent date for the most active station
-    lastest_date = session.query(Measurement.date)\
-        .filter(Measurement.station == most_active_station_id)\
-        .order_by(Measurement.date.desc())\
+    lastest_date = (
+        session.query(Measurement.date)
+        .filter(Measurement.station == most_active_station_id)
+        .order_by(Measurement.date.desc())
         .first()
-    
+    )
+
     # Finds the date that is one year before the most recent date of the most active station
-    last_year = datetime.strptime(lastest_date[0], "%Y-%m-%d").date()-dt.timedelta(days=365)
+    last_year = datetime.strptime(lastest_date[0], "%Y-%m-%d").date() - dt.timedelta(
+        days=365
+    )
 
     # Perform a query to retrieve the data for the most active station from the last 12 months
-    query_results = session.query(Measurement)\
-        .filter(Measurement.date >= last_year)\
-        .order_by(Measurement.date)\
+    query_results = (
+        session.query(Measurement)
+        .filter(Measurement.date >= last_year)
+        .order_by(Measurement.date)
         .all()
+    )
 
     # Close the session
     session.close()
@@ -132,6 +148,7 @@ def tobs_route():
 
     # Returns the jsonified data
     return jsonify(temp_list)
+
 
 # Route for our statistics from a start date to the lastest date
 @app.route("/api/v1.0/start=<start>")
@@ -143,22 +160,29 @@ def start_route(start):
     session = Session(engine)
 
     # Perform a query to retrieve the min, max, and avg of all the stations from a start date to the most recent date
-    query_results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.sum(Measurement.tobs)/func.count(Measurement.tobs))\
-    .filter(Measurement.date >= start)\
-    .all()
+    query_results = (
+        session.query(
+            func.min(Measurement.tobs),
+            func.max(Measurement.tobs),
+            func.sum(Measurement.tobs) / func.count(Measurement.tobs),
+        )
+        .filter(Measurement.date >= start)
+        .all()
+    )
 
     # Close the session
     session.close()
 
-    # Creates a dictionary of the min, max, and avg of temperatures 
+    # Creates a dictionary of the min, max, and avg of temperatures
     stats_dic = {
-        'Min': query_results[0][0],
-        'Max': query_results[0][1],
-        'Avg': query_results[0][2]
+        "Min": query_results[0][0],
+        "Max": query_results[0][1],
+        "Avg": query_results[0][2],
     }
 
     # Returns the jsonified data
     return jsonify(stats_dic)
+
 
 # Route for our statistics from a start date to an end date
 @app.route("/api/v1.0/start=<start>/end=<end>")
@@ -174,28 +198,37 @@ def start_end_route(start, end):
     else:
         beginning_date = start
         ending_date = end
-    
+
     # Create our session (link) from Python to the DB
     session = Session(engine)
 
     # Perform a query to retrieve the min, max, and avg of all the stations from a start date to the desired end date
-    query_results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.sum(Measurement.tobs)/func.count(Measurement.tobs))\
-    .filter((Measurement.date >= beginning_date)&(Measurement.date <= ending_date))\
-    .all()
+    query_results = (
+        session.query(
+            func.min(Measurement.tobs),
+            func.max(Measurement.tobs),
+            func.sum(Measurement.tobs) / func.count(Measurement.tobs),
+        )
+        .filter(
+            (Measurement.date >= beginning_date) & (Measurement.date <= ending_date)
+        )
+        .all()
+    )
 
     # Close the session
     session.close()
 
-    # Creates a dictionary of the min, max, and avg of temperatures 
+    # Creates a dictionary of the min, max, and avg of temperatures
     stats_dic = {
-        'Min': query_results[0][0],
-        'Max': query_results[0][1],
-        'Avg': query_results[0][2]
+        "Min": query_results[0][0],
+        "Max": query_results[0][1],
+        "Avg": query_results[0][2],
     }
 
     # Returns the jsonified data
     return jsonify(stats_dic)
 
+
 # Runs the app
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
