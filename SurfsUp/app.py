@@ -2,10 +2,10 @@
 from flask import Flask, jsonify
 import datetime as dt
 from datetime import datetime
-import sqlalchemy
+import dateutil.parser as parser
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
-from sqlalchemy import create_engine, func, text
+from sqlalchemy import create_engine, func
 
 #################################################
 # Database Setup
@@ -136,6 +136,9 @@ def tobs_route():
 # Route for our statistics from a start date to the lastest date
 @app.route("/api/v1.0/start=<start>")
 def start_route(start):
+    # Convert date into ISO format
+    start = parser.parse(start).date()
+
     # Create our session (link) from Python to the DB
     session = Session(engine)
 
@@ -160,6 +163,10 @@ def start_route(start):
 # Route for our statistics from a start date to an end date
 @app.route("/api/v1.0/start=<start>/end=<end>")
 def start_end_route(start, end):
+    # Converts dates into ISO format
+    start = parser.parse(start).date()
+    end = parser.parse(end).date()
+
     # Checks to see if the start date is earlier than the end date
     if start > end:
         beginning_date = end
