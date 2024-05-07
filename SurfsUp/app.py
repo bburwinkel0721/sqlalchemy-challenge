@@ -118,7 +118,7 @@ def tobs_route():
     # Finds the date that is one year before the most recent date of the most active station
     last_year = datetime.strptime(lastest_date[0], "%Y-%m-%d").date()-dt.timedelta(days=365)
 
-    # Perform a query to retrieve the data and precipitation values for the most active station from the last 12 months
+    # Perform a query to retrieve the data for the most active station from the last 12 months
     query_results = session.query(Measurement)\
         .filter(Measurement.date >= last_year)\
         .order_by(Measurement.date)\
@@ -127,7 +127,7 @@ def tobs_route():
     # Close the session
     session.close()
 
-    # Creates a dictionary of dates and precipitation for the last year
+    # Creates a list of the temperatures of the most active station for the last year
     temp_list = [row.tobs for row in query_results]
 
     # Returns the jsonified data
