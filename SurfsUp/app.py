@@ -98,11 +98,13 @@ def stations_route():
     # Close the session
     session.close()
 
-    # Creates a list of the station names
-    data_list = [row.name for row in query_results]
+    # Creates a dictionary of the station id
+    data_dic = {
+        'Stations':[row.station for row in query_results]
+        }
 
     # Returns the jsonified data
-    return jsonify(data_list)
+    return jsonify(data_dic)
 
 
 # Route for our temperature data of the most active station
@@ -144,10 +146,12 @@ def tobs_route():
     session.close()
 
     # Creates a list of the temperatures of the most active station for the last year
-    temp_list = [row.tobs for row in query_results]
+    temp_dic = {
+        'Temperatures':[row.tobs for row in query_results]
+        }
 
     # Returns the jsonified data
-    return jsonify(temp_list)
+    return jsonify(temp_dic)
 
 
 # Route for our statistics from a start date to the lastest date
