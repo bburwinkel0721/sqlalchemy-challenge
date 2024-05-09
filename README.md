@@ -16,3 +16,8 @@
   - Designed a query that calculates the lowest, highest, and average temperatures that filters on the most-active station id found in the previous query.
   - Designed a query to get the previous 12 months of temperature observation (TOBS) data.
 - Designed a Climate App
+## Instructions for running app.py
+- Download folder or copy repository to your desktop.
+- Open up the repository in VS code or your perferred IDE.
+- Navigate to app.py and then run the file.
+- Note: If you're having trouble running this file, try changing the file path for create_engine to an absolute path.
