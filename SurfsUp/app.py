@@ -43,12 +43,18 @@ app = Flask(__name__)
 def home_route():
     """List all available api routes."""
     return (
-        f"Available Routes:<br/>"
+        f"Welcome to the landing page of my Hawaii data website!<br/>" 
+        f"<br/>" 
+        f"Here are the Available Routes:<br/>"
+        f"<br/>"
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
         f"/api/v1.0/start=YYYY-MM-DD<start><br/>"
-        f"/api/v1.0/start=YYYY-MM-DD<start>/end=YYYY-MM-DD<end>"
+        f"/api/v1.0/start=YYYY-MM-DD<start>/end=YYYY-MM-DD<end><br/>"
+        f"<br/>"
+        f"Please note: For the dates, you must enter the date in the format Year-Month-Day.<br/>"
+        f"Example: 2016-04-18."
     )
 
 
